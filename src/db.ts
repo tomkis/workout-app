@@ -1,9 +1,7 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb'
+import type { WeightValue } from './units'
 
-export interface WeightValue {
-  value: number
-  unit: 'kg' | 'lbs'
-}
+export type { WeightValue }
 
 export interface Program {
   id?: number
