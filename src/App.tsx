@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react'
 import { SettingsScreen } from './SettingsScreen'
 import { HomeScreen } from './HomeScreen'
 import { ProgramWizard } from './ProgramWizard'
+import { WorkoutSessionScreen } from './WorkoutSessionScreen'
 import { useUnitPref } from './useUnitPref'
 import { getActiveProgram, saveProgram, type Program, type Workout } from './db'
+import { initSession, type ActiveSession } from './sessionEngine'
 import './App.css'
 
 type Tab = 'home' | 'programs' | 'history' | 'settings'
@@ -14,6 +16,7 @@ function App() {
   const [program, setProgram] = useState<Program | null>(null)
   const [showWizard, setShowWizard] = useState(false)
   const [confirmReplace, setConfirmReplace] = useState(false)
+  const [activeSession, setActiveSession] = useState<ActiveSession | null>(null)
 
   useEffect(() => {
     getActiveProgram().then(setProgram)
@@ -29,8 +32,19 @@ function App() {
     setTab('home')
   }
 
-  function handleReplaceRequest() {
-    setConfirmReplace(true)
+  function handleStartWorkout(workout: Workout) {
+    const programId = program?.id ?? null
+    setActiveSession(initSession(workout, programId, unit))
+  }
+
+  if (activeSession) {
+    return (
+      <WorkoutSessionScreen
+        session={activeSession}
+        onComplete={() => setActiveSession(null)}
+        onCancel={() => setActiveSession(null)}
+      />
+    )
   }
 
   if (showWizard) {
@@ -70,7 +84,8 @@ function App() {
           <HomeScreen
             program={program}
             onCreateProgram={() => setShowWizard(true)}
-            onReplaceProgram={handleReplaceRequest}
+            onReplaceProgram={() => setConfirmReplace(true)}
+            onStartWorkout={handleStartWorkout}
           />
         )}
         {tab === 'programs' && (

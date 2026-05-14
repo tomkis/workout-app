@@ -26,14 +26,22 @@ export interface Program {
   createdAt: number
 }
 
+export interface SessionSet {
+  weight: WeightValue
+  reps: number
+}
+
 export interface WorkoutSession {
   id?: number
   programId: number | null
   workoutId: string
-  date: number
+  workoutName: string
+  startedAt: number
+  completedAt: number
   exercises: {
-    exerciseId: number
-    sets: { weight: WeightValue; reps: number }[]
+    exerciseId: string
+    exerciseName: string
+    sets: SessionSet[]
   }[]
 }
 
@@ -126,4 +134,15 @@ export async function saveProgram(program: Program): Promise<number> {
 
 export async function clearActiveProgram(): Promise<void> {
   await setSetting('activeProgramId', null)
+}
+
+export async function saveSession(session: WorkoutSession): Promise<number> {
+  const db = await getDB()
+  const id = await db.add('history', session)
+  return id as number
+}
+
+export async function getAllSessions(): Promise<WorkoutSession[]> {
+  const db = await getDB()
+  return db.getAllFromIndex('history', 'by-date')
 }
