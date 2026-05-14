@@ -105,7 +105,10 @@ export async function getActiveProgram(): Promise<Program | null> {
 
 export async function saveProgram(program: Program): Promise<number> {
   const db = await getDB()
-  const id = await db.put('programs', program)
+  const tx = db.transaction('programs', 'readwrite')
+  await tx.store.clear()
+  const id = await tx.store.add({ ...program, id: undefined } as Program)
+  await tx.done
   await setSetting('activeProgramId', id)
   return id as number
 }
