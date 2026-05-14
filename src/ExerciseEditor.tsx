@@ -94,21 +94,20 @@ export function ExerciseEditor({ exercises, onChange }: Props) {
               <label className="field-label">Muscle group</label>
               <select
                 className="select-input"
-                value={adding.muscleGroup}
-                onChange={e => setAdding({ ...adding, muscleGroup: e.target.value })}
+                value={MUSCLE_GROUPS.includes(adding.muscleGroup as typeof MUSCLE_GROUPS[number]) ? adding.muscleGroup : '__custom__'}
+                onChange={e => setAdding({ ...adding, muscleGroup: e.target.value === '__custom__' ? '' : e.target.value })}
               >
                 {MUSCLE_GROUPS.map(g => <option key={g} value={g}>{g}</option>)}
-                <option value={adding.muscleGroup !== '' && !MUSCLE_GROUPS.includes(adding.muscleGroup as typeof MUSCLE_GROUPS[number]) ? adding.muscleGroup : '__custom__'}>
-                  {adding.muscleGroup !== '' && !MUSCLE_GROUPS.includes(adding.muscleGroup as typeof MUSCLE_GROUPS[number]) ? adding.muscleGroup : 'Custom…'}
-                </option>
+                <option value="__custom__">Custom…</option>
               </select>
-              {!MUSCLE_GROUPS.includes(adding.muscleGroup as typeof MUSCLE_GROUPS[number]) && adding.muscleGroup !== '__custom__' && (
+              {!MUSCLE_GROUPS.includes(adding.muscleGroup as typeof MUSCLE_GROUPS[number]) && (
                 <input
                   className="text-input"
                   style={{ marginTop: '0.375rem' }}
                   placeholder="Custom muscle group"
                   value={adding.muscleGroup}
                   onChange={e => setAdding({ ...adding, muscleGroup: e.target.value })}
+                  autoFocus
                 />
               )}
             </div>
