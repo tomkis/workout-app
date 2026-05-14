@@ -154,3 +154,47 @@ export async function getLastSessionForWorkout(workoutId: string): Promise<Worko
   if (sessions.length === 0) return null
   return sessions.reduce((a, b) => a.completedAt > b.completedAt ? a : b)
 }
+
+export interface AppExport {
+  version: number
+  exportedAt: number
+  programs: Program[]
+  history: WorkoutSession[]
+  settings: Settings[]
+}
+
+export async function exportAllData(): Promise<AppExport> {
+  const db = await getDB()
+  const [programs, history, settings] = await Promise.all([
+    db.getAll('programs'),
+    db.getAll('history'),
+    db.getAll('settings'),
+  ])
+  return { version: 1, exportedAt: Date.now(), programs, history, settings }
+}
+
+export function isValidAppExport(data: unknown): data is AppExport {
+  if (typeof data !== 'object' || data === null) return false
+  const d = data as Record<string, unknown>
+  return (
+    typeof d.version === 'number' &&
+    Array.isArray(d.programs) &&
+    Array.isArray(d.history) &&
+    Array.isArray(d.settings)
+  )
+}
+
+export async function importAllData(exported: AppExport): Promise<void> {
+  const db = await getDB()
+  const tx = db.transaction(['programs', 'history', 'settings'], 'readwrite')
+  const ps = tx.objectStore('programs')
+  const hs = tx.objectStore('history')
+  const ss = tx.objectStore('settings')
+  await Promise.all([ps.clear(), hs.clear(), ss.clear()])
+  await Promise.all([
+    ...exported.programs.map(p => ps.add(p)),
+    ...exported.history.map(s => hs.add(s)),
+    ...exported.settings.map(s => ss.put(s)),
+  ])
+  await tx.done
+}
