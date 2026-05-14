@@ -795,3 +795,61 @@ html, body, #root {
 .history-sets-table tbody tr:not(:last-child) td {
   border-bottom: 1px solid rgba(255,255,255,0.04);
 }
+
+/* Exercise history screen */
+.exercise-history {
+  padding: 0.25rem 0 1.5rem;
+}
+
+.exercise-history-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.exercise-chart-container {
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 0.875rem 0.5rem 0.75rem 0;
+  margin-bottom: 1.25rem;
+}
+
+.exercise-chart-label {
+  font-size: 0.75rem;
+  padding-left: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.exercise-history-section-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 0.625rem;
+}
+
+.exercise-session-date {
+  font-size: 0.75rem;
+  margin-bottom: 0.375rem;
+}
+
+/* Tappable exercise name in session detail */
+.history-exercise-name-btn {
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 0.625rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.history-exercise-chevron {
+  color: var(--accent);
+  font-size: 1rem;
+}

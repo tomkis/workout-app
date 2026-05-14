@@ -2,11 +2,17 @@ import { useState } from 'react'
 import type { WorkoutSession } from './db'
 import type { Unit } from './units'
 import { formatWeight } from './units'
+import { ExerciseHistoryScreen } from './ExerciseHistoryScreen'
 
 interface Props {
   sessions: WorkoutSession[]
   unit: Unit
 }
+
+type View =
+  | { type: 'list' }
+  | { type: 'session-detail'; session: WorkoutSession }
+  | { type: 'exercise-history'; exerciseId: string; exerciseName: string; fromSession: WorkoutSession }
 
 function formatDate(ts: number): string {
   return new Date(ts).toLocaleDateString(undefined, {
@@ -26,22 +32,40 @@ function formatDuration(startedAt: number, completedAt: number): string {
 }
 
 export function HistoryScreen({ sessions, unit }: Props) {
-  const [selectedSession, setSelectedSession] = useState<WorkoutSession | null>(null)
+  const [view, setView] = useState<View>({ type: 'list' })
 
-  if (selectedSession) {
+  if (view.type === 'exercise-history') {
+    return (
+      <ExerciseHistoryScreen
+        sessions={sessions}
+        exerciseId={view.exerciseId}
+        exerciseName={view.exerciseName}
+        unit={unit}
+        onBack={() => setView({ type: 'session-detail', session: view.fromSession })}
+      />
+    )
+  }
+
+  if (view.type === 'session-detail') {
+    const session = view.session
     return (
       <div className="history-detail">
-        <button className="btn-back" onClick={() => setSelectedSession(null)}>
+        <button className="btn-back" onClick={() => setView({ type: 'list' })}>
           ← Back
         </button>
-        <h2 className="history-detail-title">{selectedSession.workoutName}</h2>
+        <h2 className="history-detail-title">{session.workoutName}</h2>
         <p className="muted history-detail-meta">
-          {formatDate(selectedSession.startedAt)} · {formatDuration(selectedSession.startedAt, selectedSession.completedAt)}
+          {formatDate(session.startedAt)} · {formatDuration(session.startedAt, session.completedAt)}
         </p>
 
-        {selectedSession.exercises.map(ex => (
+        {session.exercises.map(ex => (
           <div key={ex.exerciseId} className="history-exercise">
-            <h3 className="history-exercise-name">{ex.exerciseName}</h3>
+            <button
+              className="history-exercise-name-btn"
+              onClick={() => setView({ type: 'exercise-history', exerciseId: ex.exerciseId, exerciseName: ex.exerciseName, fromSession: session })}
+            >
+              {ex.exerciseName} <span className="history-exercise-chevron">›</span>
+            </button>
             {ex.sets.length > 0 ? (
               <table className="history-sets-table">
                 <thead>
@@ -85,7 +109,7 @@ export function HistoryScreen({ sessions, unit }: Props) {
     <div className="history-list">
       <ul className="history-entries">
         {sorted.map((s, i) => (
-          <li key={s.id ?? i} className="history-entry" onClick={() => setSelectedSession(s)}>
+          <li key={s.id ?? i} className="history-entry" onClick={() => setView({ type: 'session-detail', session: s })}>
             <div className="history-entry-info">
               <span className="history-workout-name">{s.workoutName}</span>
               <span className="history-workout-meta muted">
