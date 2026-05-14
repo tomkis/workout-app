@@ -12,7 +12,7 @@ import {
   type Program,
   type Workout,
 } from './db'
-import { initSession, type ActiveSession } from './sessionEngine'
+import { initSession, type ActiveSession, type ActiveSet } from './sessionEngine'
 import { getNextWorkoutIndex, getPrefillSets } from './progressionEngine'
 import './App.css'
 
@@ -56,7 +56,7 @@ function App() {
   async function handleStartWorkout(workout: Workout) {
     const programId = program?.id ?? null
     const lastSession = await getLastSessionForWorkout(workout.id)
-    let prefillMap: Map<string, ReturnType<typeof getPrefillSets>> | undefined
+    let prefillMap: Map<string, ActiveSet[]> | undefined
 
     if (lastSession) {
       prefillMap = new Map(
