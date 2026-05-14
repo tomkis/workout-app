@@ -12,7 +12,7 @@ interface Props {
 type View =
   | { type: 'list' }
   | { type: 'session-detail'; session: WorkoutSession }
-  | { type: 'exercise-history'; exerciseId: string; exerciseName: string }
+  | { type: 'exercise-history'; exerciseId: string; exerciseName: string; fromSession: WorkoutSession }
 
 function formatDate(ts: number): string {
   return new Date(ts).toLocaleDateString(undefined, {
@@ -41,7 +41,7 @@ export function HistoryScreen({ sessions, unit }: Props) {
         exerciseId={view.exerciseId}
         exerciseName={view.exerciseName}
         unit={unit}
-        onBack={() => setView({ type: 'list' })}
+        onBack={() => setView({ type: 'session-detail', session: view.fromSession })}
       />
     )
   }
@@ -62,7 +62,7 @@ export function HistoryScreen({ sessions, unit }: Props) {
           <div key={ex.exerciseId} className="history-exercise">
             <button
               className="history-exercise-name-btn"
-              onClick={() => setView({ type: 'exercise-history', exerciseId: ex.exerciseId, exerciseName: ex.exerciseName })}
+              onClick={() => setView({ type: 'exercise-history', exerciseId: ex.exerciseId, exerciseName: ex.exerciseName, fromSession: session })}
             >
               {ex.exerciseName} <span className="history-exercise-chevron">›</span>
             </button>
