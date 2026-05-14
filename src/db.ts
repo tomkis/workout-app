@@ -3,9 +3,20 @@ import type { WeightValue } from './units'
 
 export type { WeightValue }
 
+export const MUSCLE_GROUPS = ['Chest', 'Back', 'Shoulders', 'Arms', 'Legs', 'Core'] as const
+
+export interface Exercise {
+  id: string
+  name: string
+  muscleGroup: string
+  targetSets: number
+  incrementKg?: number // per-exercise override; defaults to 2.5 kg if unset
+}
+
 export interface Workout {
   id: string
   name: string
+  exercises: Exercise[]
 }
 
 export interface Program {
