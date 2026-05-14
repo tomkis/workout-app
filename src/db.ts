@@ -126,7 +126,8 @@ export async function saveProgram(program: Program): Promise<number> {
   const db = await getDB()
   const tx = db.transaction('programs', 'readwrite')
   await tx.store.clear()
-  const id = await tx.store.add({ ...program, id: undefined } as Program)
+  const { id: _, ...rest } = program
+  const id = await tx.store.add(rest as Program)
   await tx.done
   await setSetting('activeProgramId', id)
   return id as number
@@ -138,7 +139,8 @@ export async function clearActiveProgram(): Promise<void> {
 
 export async function saveSession(session: WorkoutSession): Promise<number> {
   const db = await getDB()
-  const id = await db.add('history', session)
+  const { id: _, ...rest } = session
+  const id = await db.add('history', rest as WorkoutSession)
   return id as number
 }
 
