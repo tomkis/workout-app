@@ -144,5 +144,13 @@ export async function saveSession(session: WorkoutSession): Promise<number> {
 
 export async function getAllSessions(): Promise<WorkoutSession[]> {
   const db = await getDB()
-  return db.getAllFromIndex('history', 'by-date')
+  return db.getAll('history')
+}
+
+export async function getLastSessionForWorkout(workoutId: string): Promise<WorkoutSession | null> {
+  const db = await getDB()
+  const all = await db.getAll('history')
+  const sessions = all.filter(s => s.workoutId === workoutId)
+  if (sessions.length === 0) return null
+  return sessions.reduce((a, b) => a.completedAt > b.completedAt ? a : b)
 }
