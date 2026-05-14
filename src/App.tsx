@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { SettingsScreen } from './SettingsScreen'
 import { HomeScreen } from './HomeScreen'
+import { HistoryScreen } from './HistoryScreen'
 import { ProgramWizard } from './ProgramWizard'
 import { WorkoutSessionScreen } from './WorkoutSessionScreen'
 import { useUnitPref } from './useUnitPref'
@@ -11,6 +12,7 @@ import {
   getLastSessionForWorkout,
   type Program,
   type Workout,
+  type WorkoutSession,
 } from './db'
 import { initSession, type ActiveSession, type ActiveSet } from './sessionEngine'
 import { getNextWorkoutIndex, getPrefillSets } from './progressionEngine'
@@ -22,32 +24,30 @@ function App() {
   const [tab, setTab] = useState<Tab>('home')
   const [unit, setUnit] = useUnitPref()
   const [program, setProgram] = useState<Program | null>(null)
+  const [sessions, setSessions] = useState<WorkoutSession[]>([])
   const [showWizard, setShowWizard] = useState(false)
   const [confirmReplace, setConfirmReplace] = useState(false)
   const [activeSession, setActiveSession] = useState<ActiveSession | null>(null)
   const [suggestedWorkoutIndex, setSuggestedWorkoutIndex] = useState<number | null>(null)
 
-  useEffect(() => {
-    async function load() {
-      const [loaded, sessions] = await Promise.all([getActiveProgram(), getAllSessions()])
-      setProgram(loaded)
-      if (loaded) {
-        const idx = getNextWorkoutIndex(loaded.workouts, sessions, loaded.id ?? null)
-        setSuggestedWorkoutIndex(idx)
-      }
+  async function loadData() {
+    const [loaded, allSessions] = await Promise.all([getActiveProgram(), getAllSessions()])
+    setProgram(loaded)
+    setSessions(allSessions)
+    if (loaded) {
+      const idx = getNextWorkoutIndex(loaded.workouts, allSessions, loaded.id ?? null)
+      setSuggestedWorkoutIndex(idx)
     }
-    load()
+  }
+
+  useEffect(() => {
+    loadData()
   }, [])
 
   async function handleSaveProgram(name: string, workouts: Workout[]) {
     const saved: Program = { name, workouts, createdAt: Date.now() }
     await saveProgram(saved)
-    const [loaded, sessions] = await Promise.all([getActiveProgram(), getAllSessions()])
-    setProgram(loaded)
-    if (loaded) {
-      const idx = getNextWorkoutIndex(loaded.workouts, sessions, loaded.id ?? null)
-      setSuggestedWorkoutIndex(idx)
-    }
+    await loadData()
     setShowWizard(false)
     setConfirmReplace(false)
     setTab('home')
@@ -72,12 +72,7 @@ function App() {
 
   async function handleSessionComplete() {
     setActiveSession(null)
-    const [loaded, sessions] = await Promise.all([getActiveProgram(), getAllSessions()])
-    setProgram(loaded)
-    if (loaded) {
-      const idx = getNextWorkoutIndex(loaded.workouts, sessions, loaded.id ?? null)
-      setSuggestedWorkoutIndex(idx)
-    }
+    await loadData()
   }
 
   if (activeSession) {
@@ -139,10 +134,7 @@ function App() {
           </div>
         )}
         {tab === 'history' && (
-          <div className="placeholder">
-            <p>History</p>
-            <p className="muted">Your completed workouts will appear here.</p>
-          </div>
+          <HistoryScreen sessions={sessions} unit={unit} />
         )}
         {tab === 'settings' && (
           <SettingsScreen unit={unit} onUnitChange={setUnit} />
