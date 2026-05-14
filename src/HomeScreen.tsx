@@ -1,12 +1,13 @@
-import type { Program } from './db'
+import type { Program, Workout } from './db'
 
 interface Props {
   program: Program | null
   onCreateProgram: () => void
   onReplaceProgram: () => void
+  onStartWorkout: (workout: Workout) => void
 }
 
-export function HomeScreen({ program, onCreateProgram, onReplaceProgram }: Props) {
+export function HomeScreen({ program, onCreateProgram, onReplaceProgram, onStartWorkout }: Props) {
   if (!program) {
     return (
       <div className="placeholder">
@@ -41,6 +42,7 @@ export function HomeScreen({ program, onCreateProgram, onReplaceProgram }: Props
                 </span>
               )}
             </div>
+            <button className="btn-start" onClick={() => onStartWorkout(w)}>Start</button>
           </li>
         ))}
       </ul>
