@@ -1,10 +1,13 @@
 import { useState } from 'react'
+import { SettingsScreen } from './SettingsScreen'
+import { useUnitPref } from './useUnitPref'
 import './App.css'
 
 type Tab = 'home' | 'programs' | 'history' | 'settings'
 
 function App() {
   const [tab, setTab] = useState<Tab>('home')
+  const [unit, setUnit] = useUnitPref()
 
   return (
     <div className="app-shell">
@@ -32,10 +35,7 @@ function App() {
           </div>
         )}
         {tab === 'settings' && (
-          <div className="placeholder">
-            <p>Settings</p>
-            <p className="muted">Configure your preferences.</p>
-          </div>
+          <SettingsScreen unit={unit} onUnitChange={setUnit} />
         )}
       </main>
 

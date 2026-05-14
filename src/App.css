@@ -94,3 +94,57 @@ html, body, #root {
   color: var(--accent);
   font-weight: 600;
 }
+
+/* Settings screen */
+.settings-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.settings-screen h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: var(--surface);
+  border-radius: 8px;
+}
+
+.settings-label {
+  font-size: 0.9375rem;
+  color: var(--text);
+}
+
+.toggle-group {
+  display: flex;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.toggle-group button {
+  padding: 0.375rem 0.875rem;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.toggle-group button + button {
+  border-left: 1px solid rgba(255,255,255,0.12);
+}
+
+.toggle-group button.active {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
