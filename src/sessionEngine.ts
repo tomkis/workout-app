@@ -22,7 +22,12 @@ export interface ActiveSession {
   unit: Unit
 }
 
-export function initSession(workout: Workout, programId: number | null, unit: Unit): ActiveSession {
+export function initSession(
+  workout: Workout,
+  programId: number | null,
+  unit: Unit,
+  prefillSets?: Map<string, ActiveSet[]>,
+): ActiveSession {
   return {
     programId,
     workoutId: workout.id,
@@ -33,7 +38,8 @@ export function initSession(workout: Workout, programId: number | null, unit: Un
       exerciseId: ex.id,
       exerciseName: ex.name,
       targetSets: ex.targetSets,
-      sets: Array.from({ length: ex.targetSets }, () => ({ weight: '', reps: '' })),
+      sets: prefillSets?.get(ex.id)
+        ?? Array.from({ length: ex.targetSets }, () => ({ weight: '', reps: '' })),
     })),
   }
 }
