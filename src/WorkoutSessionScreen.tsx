@@ -27,9 +27,9 @@ export function WorkoutSessionScreen({ session: initial, onComplete, onCancel }:
   return (
     <div className="app-shell">
       <header className="app-header session-header">
-        <button className="btn-ghost" onClick={onCancel}>✕</button>
+        <button className="btn-ghost session-cancel" onClick={onCancel} aria-label="Cancel workout">✕</button>
         <h1>{session.workoutName}</h1>
-        <button className="btn-accent-small" onClick={() => setCompleting(true)}>Done</button>
+        <div style={{ width: '2.75rem' }} />
       </header>
 
       <main className="app-content session-content">
@@ -93,6 +93,12 @@ export function WorkoutSessionScreen({ session: initial, onComplete, onCancel }:
           </div>
         ))}
       </main>
+
+      <footer className="session-footer">
+        <button className="btn-primary" onClick={() => setCompleting(true)}>
+          Finish workout
+        </button>
+      </footer>
 
       {completing && (
         <div className="modal-overlay">

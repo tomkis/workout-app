@@ -142,10 +142,18 @@ function App() {
       </main>
 
       <nav className="app-nav">
-        <button className={tab === 'home' ? 'active' : ''} onClick={() => setTab('home')}>Home</button>
-        <button className={tab === 'programs' ? 'active' : ''} onClick={() => setTab('programs')}>Programs</button>
-        <button className={tab === 'history' ? 'active' : ''} onClick={() => setTab('history')}>History</button>
-        <button className={tab === 'settings' ? 'active' : ''} onClick={() => setTab('settings')}>Settings</button>
+        <button className={tab === 'home' ? 'active' : ''} onClick={() => setTab('home')}>
+          <span className="nav-icon">⊞</span>Home
+        </button>
+        <button className={tab === 'programs' ? 'active' : ''} onClick={() => setTab('programs')}>
+          <span className="nav-icon">📋</span>Programs
+        </button>
+        <button className={tab === 'history' ? 'active' : ''} onClick={() => setTab('history')}>
+          <span className="nav-icon">📈</span>History
+        </button>
+        <button className={tab === 'settings' ? 'active' : ''} onClick={() => setTab('settings')}>
+          <span className="nav-icon">⚙</span>Settings
+        </button>
       </nav>
     </div>
   )
