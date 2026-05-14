@@ -33,7 +33,14 @@ export function HomeScreen({ program, onCreateProgram, onReplaceProgram }: Props
         {program.workouts.map((w, i) => (
           <li key={w.id} className="program-workout-item">
             <span className="workout-index">{i + 1}</span>
-            <span className="workout-name">{w.name}</span>
+            <div className="program-workout-info">
+              <span className="workout-name">{w.name}</span>
+              {w.exercises.length > 0 && (
+                <span className="workout-exercise-count muted">
+                  {w.exercises.length} exercise{w.exercises.length !== 1 ? 's' : ''}
+                </span>
+              )}
+            </div>
           </li>
         ))}
       </ul>
