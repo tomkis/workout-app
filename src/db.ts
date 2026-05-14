@@ -3,16 +3,22 @@ import type { WeightValue } from './units'
 
 export type { WeightValue }
 
+export interface Workout {
+  id: string
+  name: string
+}
+
 export interface Program {
   id?: number
   name: string
-  workoutIds: number[]
+  workouts: Workout[]
   createdAt: number
 }
 
 export interface WorkoutSession {
   id?: number
   programId: number | null
+  workoutId: string
   date: number
   exercises: {
     exerciseId: number
@@ -29,7 +35,6 @@ interface WorkoutDB extends DBSchema {
   programs: {
     key: number
     value: Program
-    indexes: { 'by-name': string }
   }
   history: {
     key: number
@@ -46,21 +51,34 @@ let dbPromise: Promise<IDBPDatabase<WorkoutDB>> | null = null
 
 export function getDB(): Promise<IDBPDatabase<WorkoutDB>> {
   if (!dbPromise) {
-    dbPromise = openDB<WorkoutDB>('workout-app', 1, {
-      upgrade(db) {
-        const programs = db.createObjectStore('programs', {
-          keyPath: 'id',
-          autoIncrement: true,
-        })
-        programs.createIndex('by-name', 'name')
-
-        const history = db.createObjectStore('history', {
-          keyPath: 'id',
-          autoIncrement: true,
-        })
-        history.createIndex('by-date', 'date')
-
-        db.createObjectStore('settings', { keyPath: 'key' })
+    dbPromise = openDB<WorkoutDB>('workout-app', 2, {
+      upgrade(db, oldVersion) {
+        if (oldVersion < 1) {
+          const history = db.createObjectStore('history', {
+            keyPath: 'id',
+            autoIncrement: true,
+          })
+          history.createIndex('by-date', 'date')
+          db.createObjectStore('settings', { keyPath: 'key' })
+        }
+        if (oldVersion < 2) {
+          if (!db.objectStoreNames.contains('programs')) {
+            db.createObjectStore('programs', {
+              keyPath: 'id',
+              autoIncrement: true,
+            })
+          }
+          if (!db.objectStoreNames.contains('history')) {
+            const history = db.createObjectStore('history', {
+              keyPath: 'id',
+              autoIncrement: true,
+            })
+            history.createIndex('by-date', 'date')
+          }
+          if (!db.objectStoreNames.contains('settings')) {
+            db.createObjectStore('settings', { keyPath: 'key' })
+          }
+        }
       },
     })
   }
@@ -76,4 +94,22 @@ export async function getSetting<T>(key: string, defaultValue: T): Promise<T> {
 export async function setSetting<T>(key: string, value: T): Promise<void> {
   const db = await getDB()
   await db.put('settings', { key, value })
+}
+
+export async function getActiveProgram(): Promise<Program | null> {
+  const db = await getDB()
+  const id = await getSetting<number | null>('activeProgramId', null)
+  if (id === null) return null
+  return (await db.get('programs', id)) ?? null
+}
+
+export async function saveProgram(program: Program): Promise<number> {
+  const db = await getDB()
+  const id = await db.put('programs', program)
+  await setSetting('activeProgramId', id)
+  return id as number
+}
+
+export async function clearActiveProgram(): Promise<void> {
+  await setSetting('activeProgramId', null)
 }

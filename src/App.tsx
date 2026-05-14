@@ -1,6 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { SettingsScreen } from './SettingsScreen'
+import { HomeScreen } from './HomeScreen'
+import { ProgramWizard } from './ProgramWizard'
 import { useUnitPref } from './useUnitPref'
+import { getActiveProgram, saveProgram, type Program, type Workout } from './db'
 import './App.css'
 
 type Tab = 'home' | 'programs' | 'history' | 'settings'
@@ -8,6 +11,53 @@ type Tab = 'home' | 'programs' | 'history' | 'settings'
 function App() {
   const [tab, setTab] = useState<Tab>('home')
   const [unit, setUnit] = useUnitPref()
+  const [program, setProgram] = useState<Program | null>(null)
+  const [showWizard, setShowWizard] = useState(false)
+  const [confirmReplace, setConfirmReplace] = useState(false)
+
+  useEffect(() => {
+    getActiveProgram().then(setProgram)
+  }, [])
+
+  async function handleSaveProgram(name: string, workouts: Workout[]) {
+    const saved: Program = { name, workouts, createdAt: Date.now() }
+    await saveProgram(saved)
+    const loaded = await getActiveProgram()
+    setProgram(loaded)
+    setShowWizard(false)
+    setConfirmReplace(false)
+    setTab('home')
+  }
+
+  function handleReplaceRequest() {
+    setConfirmReplace(true)
+  }
+
+  if (showWizard) {
+    return (
+      <div className="app-shell">
+        <ProgramWizard
+          onSave={handleSaveProgram}
+          onCancel={() => { setShowWizard(false); setConfirmReplace(false) }}
+        />
+      </div>
+    )
+  }
+
+  if (confirmReplace) {
+    return (
+      <div className="app-shell">
+        <div className="app-content confirm-dialog">
+          <h2>Replace program?</h2>
+          <p className="muted">This will replace your current program <strong>{program?.name}</strong>. Your workout history will be kept.</p>
+          <div className="confirm-actions">
+            <button className="btn-ghost" onClick={() => setConfirmReplace(false)}>Cancel</button>
+            <button className="btn-danger" onClick={() => setShowWizard(true)}>Replace</button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="app-shell">
@@ -17,10 +67,11 @@ function App() {
 
       <main className="app-content">
         {tab === 'home' && (
-          <div className="placeholder">
-            <p>Welcome to Workout App</p>
-            <p className="muted">Start a workout to begin tracking.</p>
-          </div>
+          <HomeScreen
+            program={program}
+            onCreateProgram={() => setShowWizard(true)}
+            onReplaceProgram={handleReplaceRequest}
+          />
         )}
         {tab === 'programs' && (
           <div className="placeholder">
